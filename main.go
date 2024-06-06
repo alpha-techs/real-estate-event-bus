@@ -1,8 +1,9 @@
 package main
 
 import (
+	"embed"
+	"event-bus/service"
 	"github.com/gin-gonic/gin"
-	"real-estate-bot/service"
 )
 
 type UpdateBeRequest struct {
@@ -49,7 +50,17 @@ type LarkCardEvent struct {
 	}
 }
 
+//go:embed config/config.yml
+var configFs embed.FS
+
+//go:embed template/*
+var templatesFs embed.FS
+
 func main() {
+	_ = service.LoadConfig(configFs)
+
+	_ = service.LoadTemplates(templatesFs)
+
 	r := gin.Default()
 
 	r.GET("/ping", func(c *gin.Context) {
@@ -122,6 +133,14 @@ func main() {
 			return
 		}
 		_, err = service.SendCardToChat(cardContent)
+		if err != nil {
+			c.JSON(500, gin.H{"error": err.Error()})
+			return
+		}
+		c.JSON(200, gin.H{
+			"oldVersion": oldVersion,
+			"newVersion": newVersion,
+		})
 	})
 
 	/**

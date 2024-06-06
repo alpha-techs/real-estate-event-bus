@@ -1,4 +1,4 @@
-module real-estate-bot
+module event-bus
 
 go 1.22
 

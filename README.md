@@ -17,3 +17,19 @@
 - [ ] 接口认证
 
 - [ ] 支持多环境
+
+## 开发
+
+### 本地运行
+
+```bash
+go run main.go
+```
+
+## 部署
+
+### AWS EC2原生部署
+
+```bash
+nohup event-bus > /dev/null 2>&1 &
+```

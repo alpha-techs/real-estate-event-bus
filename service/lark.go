@@ -1,7 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"context"
+	"embed"
 	"errors"
 	"github.com/cbroglie/mustache"
 	lark "github.com/larksuite/oapi-sdk-go/v3"
@@ -9,46 +11,71 @@ import (
 	"github.com/spf13/viper"
 )
 
-func BuildUpdateCard(
-	oldVersion string,
-	newVersion string,
-) (string, error) {
-	print("oldVersion: ", oldVersion)
-	print("newVersion: ", newVersion)
-	// use mustache to render card using template/update-card.mustache
-	params := map[string]interface{}{
-		"oldVersion": oldVersion,
-		"newVersion": newVersion,
-	}
-
-	cardStr, err := mustache.RenderFile("template/update-card.mustache", params)
-	if err != nil {
-		return "", err
-	}
-	return cardStr, nil
-}
-
 type LarkConfig struct {
 	AppId     string `mapstructure:"app_id"`
 	AppSecret string `mapstructure:"app_secret"`
 	ChatId    string `mapstructure:"chat_id"`
 }
 
-func getLarkConfig() (LarkConfig, error) {
-	// read config/config.yml using viper
-	viper.AddConfigPath("config")
-	viper.SetConfigName("config")
+var configData *LarkConfig
+
+func LoadConfig(fs embed.FS) error {
+	data, err := fs.ReadFile("config/config.yml")
+	if err != nil {
+		return err
+	}
 	viper.SetConfigType("yml")
-	err := viper.ReadInConfig()
+	err = viper.ReadConfig(bytes.NewReader(data))
 	if err != nil {
-		return LarkConfig{}, err
+		return err
 	}
-	var larkConfig LarkConfig
-	err = viper.UnmarshalKey("lark", &larkConfig)
+	err = viper.UnmarshalKey("lark", &configData)
 	if err != nil {
-		return LarkConfig{}, err
+		return err
 	}
-	return larkConfig, nil
+	return nil
+}
+
+var templates map[string]string
+
+func LoadTemplates(fs embed.FS) error {
+	templates = make(map[string]string)
+	files, err := fs.ReadDir("template")
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		fileName := file.Name()
+		data, _ := fs.ReadFile("template" + "/" + fileName)
+		templates[fileName] = string(data)
+	}
+	return nil
+}
+
+func BuildUpdateCard(
+	oldVersion string,
+	newVersion string,
+) (string, error) {
+	// use mustache to render card using template/update-card.mustache
+	params := map[string]interface{}{
+		"oldVersion": oldVersion,
+		"newVersion": newVersion,
+	}
+
+	template := templates["update-card.mustache"]
+
+	cardStr, err := mustache.Render(template, params)
+	if err != nil {
+		return "", err
+	}
+	return cardStr, nil
+}
+
+func getLarkConfig() (*LarkConfig, error) {
+	if configData == nil {
+		return nil, errors.New("config not loaded")
+	}
+	return configData, nil
 }
 
 func SendCardToChat(
