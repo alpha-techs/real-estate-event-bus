@@ -7,6 +7,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup config/config.yml from secrets
+        run: echo "${{ secrets.CONFIG }}" > config/config.yml
+
       - name: Setup Go
         uses: actions/setup-go@v5
         with:

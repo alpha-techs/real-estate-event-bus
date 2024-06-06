@@ -1,0 +1,134 @@
+{
+  "config": {},
+  "i18n_elements": {
+    "zh_cn": [
+      {
+        "tag": "div",
+        "text": {
+          "content": "**后端版本升级** WT环境",
+          "tag": "lark_md",
+          "text_align": "center"
+        }
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "column_set",
+        "flex_mode": "bisect",
+        "background_style": "grey",
+        "horizontal_spacing": "default",
+        "columns": [
+          {
+            "tag": "column",
+            "width": "weighted",
+            "vertical_align": "top",
+            "elements": [
+              {
+                "tag": "markdown",
+                "content": "**{{oldVersion}}**",
+                "text_align": "left"
+              },
+              {
+                "tag": "column_set",
+                "flex_mode": "none",
+                "horizontal_spacing": "default",
+                "background_style": "default",
+                "columns": [
+                  {
+                    "tag": "column",
+                    "elements": [
+                      {
+                        "tag": "div",
+                        "text": {
+                          "tag": "plain_text",
+                          "content": "🟢 现存版本",
+                          "text_align": "left"
+                        }
+                      }
+                    ],
+                    "width": "weighted",
+                    "weight": 1
+                  }
+                ]
+              }
+            ],
+            "weight": 2
+          },
+          {
+            "tag": "column",
+            "width": "weighted",
+            "vertical_align": "top",
+            "elements": [
+              {
+                "tag": "markdown",
+                "content": "**{{newVersion}}**",
+                "text_align": "right"
+              },
+              {
+                "tag": "markdown",
+                "content": "升级后版本 ⬆️",
+                "text_align": "right"
+              }
+            ],
+            "weight": 2
+          }
+        ]
+      },
+      {
+        "tag": "hr"
+      },
+      {
+        "tag": "action",
+        "actions": [
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "确认升级"
+            },
+            "type": "primary_filled",
+            "value": {
+              "command": "update-be",
+              "params": "[\"{{newVersion}}\"]"
+            }
+          },
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "查看diff"
+            },
+            "type": "primary",
+            "multi_url": {
+              "url": "https://github.com/alpha-techs/real-estate-be/compare/{{oldVersion}}...{{newVersion}}",
+              "pc_url": "",
+              "android_url": "",
+              "ios_url": ""
+            }
+          },
+          {
+            "tag": "button",
+            "text": {
+              "tag": "plain_text",
+              "content": "取消"
+            },
+            "type": "danger",
+            "value": {
+              "command": "cancel-update"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "header": {
+    "template": "blue",
+    "title": {
+      "tag": "plain_text",
+      "i18n": {
+        "zh_cn": "升级提醒"
+      }
+    }
+  }
+}

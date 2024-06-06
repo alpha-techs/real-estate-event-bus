@@ -1,6 +1,10 @@
 package service
 
-import "os/exec"
+import (
+	"errors"
+	"os/exec"
+	"strings"
+)
 
 func UpdateBe(version string) error {
 	DockerRepo := "icylydia/real-estate-be-wt"
@@ -28,4 +32,22 @@ func UpdateBe(version string) error {
 		return err
 	}
 	return nil
+}
+
+func GetBeVersion() (string, error) {
+	cmd := "docker ps -a --filter name=real-estate-be --format {{.Image}} | awk -F ':' '{print $2}'"
+
+	version, err := exec.Command("bash", "-c", cmd).Output()
+	if err != nil {
+		print(err.Error())
+		return "", err
+	}
+
+	if len(version) == 0 {
+		return "", errors.New("unable to get the version of the backend service")
+	}
+
+	trimmedVersion := strings.TrimSuffix(string(version), "\n")
+
+	return trimmedVersion, nil
 }
