@@ -15,8 +15,11 @@ type GhActionBeReleaseRequest struct {
 }
 
 type LarkCardEvent struct {
-	Schema string `json:"schema"`
-	Header struct {
+	Challenge string `json:"challenge"`
+	Type      string `json:"type"`
+	Token     string `json:"token"`
+	Schema    string `json:"schema"`
+	Header    struct {
 		EventId    string `json:"event_id"`
 		Token      string `json:"token"`
 		CreateTime string `json:"create_time"`
@@ -153,6 +156,13 @@ func main() {
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
+
+		if json.Type == "url_verification" {
+			c.JSON(200, gin.H{"challenge": json.Challenge})
+			return
+		}
+
+		print(c.Request.Body)
 
 		command := json.Event.Action.Value.Command
 		params := json.Event.Action.Value.Params
