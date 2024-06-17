@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"embed"
 	"event-bus/service"
+	"github.com/bytedance/sonic"
 	"github.com/gin-gonic/gin"
+	"io"
 )
 
 type UpdateBeRequest struct {
@@ -36,8 +39,8 @@ type LarkCardEvent struct {
 		Token  string `json:"token"`
 		Action struct {
 			Value struct {
-				Command string   `json:"command"`
-				Params  []string `json:"params"`
+				Command string `json:"command"`
+				Params  string `json:"params"`
 			} `json:"value"`
 			Tag    string `json:"tag"`
 			Option string `json:"option"`
@@ -150,35 +153,48 @@ func main() {
 	 * 监听Lark卡片点击事件
 	 */
 	r.POST("/lark/card", func(c *gin.Context) {
-		var json LarkCardEvent
+		var request LarkCardEvent
 
-		print(c.Request.Body)
+		body, _ := io.ReadAll(c.Request.Body)
+		println(string(body))
 
-		if err := c.ShouldBindJSON(&json); err != nil {
-			print(err.Error())
+		c.Request.Body = io.NopCloser(bytes.NewReader(body))
+
+		if err := c.ShouldBindJSON(&request); err != nil {
+			println(err.Error())
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
 
-		if json.Type == "url_verification" {
-			c.JSON(200, gin.H{"challenge": json.Challenge})
+		if request.Type == "url_verification" {
+			c.JSON(200, gin.H{"challenge": request.Challenge})
 			return
 		}
 
-		command := json.Event.Action.Value.Command
-		params := json.Event.Action.Value.Params
+		command := request.Event.Action.Value.Command
+		params := request.Event.Action.Value.Params
 
 		if command == "update-be" {
-			version := params[0]
+			type UpdateBeParams []string
+			var updateBeParams UpdateBeParams
+			err := sonic.Unmarshal([]byte(params), &updateBeParams)
+
+			if err != nil {
+				c.JSON(400, gin.H{"error": err.Error()})
+				return
+			}
+
+			version := updateBeParams[0]
+
 			// update be in background and return immediately
 			go func() {
 				err := service.UpdateBe(version)
 				if err != nil {
 					// 更新卡片，提示用户更新失败
-					print("更新失败")
+					println(version, " 更新失败")
 				} else {
 					// 更新卡片，提示用户更新成功
-					print("更新成功")
+					println(version, " 更新成功")
 				}
 			}()
 
