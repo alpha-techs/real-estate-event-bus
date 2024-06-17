@@ -152,7 +152,10 @@ func main() {
 	r.POST("/lark/card", func(c *gin.Context) {
 		var json LarkCardEvent
 
+		print(c.Request.Body)
+
 		if err := c.ShouldBindJSON(&json); err != nil {
+			print(err.Error())
 			c.JSON(400, gin.H{"error": err.Error()})
 			return
 		}
@@ -161,8 +164,6 @@ func main() {
 			c.JSON(200, gin.H{"challenge": json.Challenge})
 			return
 		}
-
-		print(c.Request.Body)
 
 		command := json.Event.Action.Value.Command
 		params := json.Event.Action.Value.Params
