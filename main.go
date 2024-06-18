@@ -184,17 +184,30 @@ func main() {
 				return
 			}
 
-			version := updateBeParams[0]
+			currentVersion, err := service.GetBeVersion()
+			if err != nil {
+				c.JSON(500, gin.H{"error": err.Error()})
+				return
+			}
+			newVersion := updateBeParams[0]
+			messageId := request.Event.Context.OpenMessageID
 
 			// update be in background and return immediately
 			go func() {
-				err := service.UpdateBe(version)
+				err := service.UpdateBe(newVersion)
 				if err != nil {
 					// 更新卡片，提示用户更新失败
-					println(version, " 更新失败")
+					println(newVersion, " 更新失败")
 				} else {
 					// 更新卡片，提示用户更新成功
-					println(version, " 更新成功")
+					successCard, err := service.BuildUpdateSuccessCard(currentVersion, newVersion)
+					if err != nil {
+						println(err.Error())
+					}
+					_, err = service.UpdateCard(successCard, messageId)
+					if err != nil {
+						println(err.Error())
+					}
 				}
 			}()
 
@@ -206,7 +219,7 @@ func main() {
 		c.JSON(200, gin.H{})
 	})
 
-	err := r.Run(":9100")
+	err := r.Run(":9200")
 	if err != nil {
 		return
 	}

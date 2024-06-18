@@ -42,7 +42,7 @@
                         "tag": "div",
                         "text": {
                           "tag": "plain_text",
-                          "content": "🟢 现存版本",
+                          "content": "🟡 升级前版本",
                           "text_align": "left"
                         }
                       }
@@ -67,7 +67,7 @@
               },
               {
                 "tag": "markdown",
-                "content": "升级后版本 🔺",
+                "content": "升级后版本 🟢",
                 "text_align": "right"
               }
             ],
@@ -85,13 +85,9 @@
             "tag": "button",
             "text": {
               "tag": "plain_text",
-              "content": "确认升级"
+              "content": "升级完成"
             },
-            "type": "primary_filled",
-            "value": {
-              "command": "update-be",
-              "params": "[\"{{newVersion}}\"]"
-            }
+            "type": "default"
           },
           {
             "tag": "button",
@@ -106,28 +102,17 @@
               "android_url": "",
               "ios_url": ""
             }
-          },
-          {
-            "tag": "button",
-            "text": {
-              "tag": "plain_text",
-              "content": "取消"
-            },
-            "type": "danger",
-            "value": {
-              "command": "cancel-update"
-            }
           }
         ]
       }
     ]
   },
   "header": {
-    "template": "blue",
+    "template": "green",
     "title": {
       "tag": "plain_text",
       "i18n": {
-        "zh_cn": "升级提醒"
+        "zh_cn": "升级成功"
       }
     }
   }

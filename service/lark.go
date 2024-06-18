@@ -71,6 +71,25 @@ func BuildUpdateCard(
 	return cardStr, nil
 }
 
+func BuildUpdateSuccessCard(
+	oldVersion string,
+	newVersion string,
+) (string, error) {
+	// use mustache to render card using template/update-success-card.mustache
+	params := map[string]interface{}{
+		"oldVersion": oldVersion,
+		"newVersion": newVersion,
+	}
+
+	template := templates["update-success-card.mustache"]
+
+	cardStr, err := mustache.Render(template, params)
+	if err != nil {
+		return "", err
+	}
+	return cardStr, nil
+}
+
 func getLarkConfig() (*LarkConfig, error) {
 	if configData == nil {
 		return nil, errors.New("config not loaded")
@@ -97,6 +116,32 @@ func SendCardToChat(
 		Build()
 
 	resp, err := client.Im.V1.Message.Create(context.Background(), req)
+	if err != nil {
+		return nil, err
+	}
+	if !resp.Success() {
+		return nil, errors.New(resp.Msg)
+	}
+	return resp, nil
+}
+
+func UpdateCard(
+	cardContent string,
+	messageId string,
+) (*larkim.PatchMessageResp, error) {
+	// get lark config
+	larkConfig, err := getLarkConfig()
+	if err != nil {
+		return nil, err
+	}
+	client := lark.NewClient(larkConfig.AppId, larkConfig.AppSecret)
+	req := larkim.NewPatchMessageReqBuilder().
+		MessageId(messageId).
+		Body(larkim.NewPatchMessageReqBodyBuilder().
+			Content(cardContent).
+			Build()).
+		Build()
+	resp, err := client.Im.V1.Message.Patch(context.Background(), req)
 	if err != nil {
 		return nil, err
 	}
