@@ -39,7 +39,7 @@ func GetBeVersion() (string, error) {
 
 	version, err := exec.Command("bash", "-c", cmd).Output()
 	if err != nil {
-		print(err.Error())
+		println(err.Error())
 		return "", err
 	}
 
